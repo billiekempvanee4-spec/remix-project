@@ -293,14 +293,15 @@ export function categoryFileToken(categoryPath: string): string {
  * sanitizes away (a file named `__.sol`). The result is always a single path
  * segment — it is interpolated straight into a write path.
  */
-export function deriveContractName(target: string, namesByFile: Record<string, string[]> = {}, existingFolders: string[] = []): string {
+export function deriveContractName(target: string, namesByFile: Record<string, string[]> = {}): string {
   if (!target) return ''
-  const fromCompiled = sanitizeSegment(namesByFile[target]?.[0] ?? '')
-  const fromStem = sanitizeSegment((target.split('/').pop() ?? target).replace(/\.sol$/i, '')) || 'contract'
-  const existing = new Set(existingFolders.map(entry => entry.split('/').filter(Boolean).pop()))
-  if (fromCompiled && existing.has(fromCompiled)) return fromCompiled
-  if (existing.has(fromStem)) return fromStem
-  return fromCompiled || fromStem
+  const compiled = namesByFile[target]?.[0]
+  if (compiled) {
+    const fromCompiled = sanitizeSegment(compiled)
+    if (fromCompiled) return fromCompiled
+  }
+  const stem = (target.split('/').pop() ?? target).replace(/\.sol$/i, '')
+  return sanitizeSegment(stem) || 'contract'
 }
 
 /**
